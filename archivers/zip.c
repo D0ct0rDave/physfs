@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #ifndef _WIN32_WCE
 #include <errno.h>
 #include <time.h>
@@ -929,6 +930,7 @@ static int zip_load_entry(void *in, ZIPentry *entry, PHYSFS_uint32 ofs_fixup)
     entry->resolved = (zip_has_symlink_attr(entry, external_attr)) ?
                             ZIP_UNRESOLVED_SYMLINK : ZIP_UNRESOLVED_FILE;
 
+	// DMC: sitio para convertir a lower case todo...
     entry->name = (char *) allocator.Malloc(fnamelen + 1);
     BAIL_IF_MACRO(entry->name == NULL, ERR_OUT_OF_MEMORY, 0);
     if (__PHYSFS_platformRead(in, entry->name, fnamelen, 1) != 1)
@@ -936,6 +938,9 @@ static int zip_load_entry(void *in, ZIPentry *entry, PHYSFS_uint32 ofs_fixup)
 
     entry->name[fnamelen] = '\0';  /* null-terminate the filename. */
     zip_convert_dos_path(entry, entry->name);
+
+	for (ui32=0;ui32<fnamelen;ui32++)
+		entry->name[ui32] = tolower(entry->name[ui32]);
 
     si64 = __PHYSFS_platformTell(in);
     if (si64 == -1)

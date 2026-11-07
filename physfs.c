@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "physfs.h"
 
 #define __PHYSICSFS_INTERNAL__
@@ -489,7 +490,7 @@ static int sanitizePlatformIndependentPath(const char *src, char *dst)
             prev = dst + 1;
         } /* if */
 
-        *(dst++) = ch;
+        *(dst++) = tolower(ch);
     } while (ch != '\0');
 
     return(1);

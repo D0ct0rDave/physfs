@@ -1048,7 +1048,10 @@ PHYSFS_sint64 __PHYSFS_platformRead(void *opaque, void *buffer,
                                     PHYSFS_uint32 size, PHYSFS_uint32 count)
 {
     HANDLE Handle = ((WinApiFile *) opaque)->handle;
-    DWORD CountOfBytesRead;
+    
+	unsigned char* pucBuffer = (unsigned char*)buffer;	// DMC: XOR Encode/Decode
+	int i;												// DMC: XOR Encode/Decode
+	DWORD CountOfBytesRead;
     PHYSFS_sint64 retval;
 
     /* Read data from the file */
@@ -1064,6 +1067,13 @@ PHYSFS_sint64 __PHYSFS_platformRead(void *opaque, void *buffer,
         retval = CountOfBytesRead / size;
     } /* else */
 
+
+	// DMC: XOR Encode/Decode
+	for (i=0;(i<(count*size));i++)
+		pucBuffer[i] ^= 0xa5;
+	// DMC: XOR Encode/Decode
+
+
     return(retval);
 } /* __PHYSFS_platformRead */
 
@@ -1072,10 +1082,18 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buffer,
                                      PHYSFS_uint32 size, PHYSFS_uint32 count)
 {
     HANDLE Handle = ((WinApiFile *) opaque)->handle;
+
+	unsigned char* pucBuffer = (unsigned char*)buffer;	// DMC: XOR Encode/Decode
+	int i;												// DMC: XOR Encode/Decode
     DWORD CountOfBytesWritten;
     PHYSFS_sint64 retval;
 
-    /* Read data from the file */
+	// DMC: XOR Encode
+	for (i=0;(i<(count*size));i++)
+		pucBuffer[i] ^= 0xa5;
+	// DMC: XOR Encode
+
+	/* Read data from the file */
     /* !!! FIXME: uint32 might be a greater # than DWORD */
     if(!WriteFile(Handle, buffer, count * size, &CountOfBytesWritten, NULL))
     {
@@ -1087,6 +1105,11 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buffer,
         /* !!! FIXME: What if not the right number of bytes was written? */
         retval = CountOfBytesWritten / size;
     } /* else */
+
+	// DMC: XOR Decode
+	for (i=0;(i<(count*size));i++)
+		pucBuffer[i] ^= 0xa5;
+	// DMC: XOR Decode
 
     return(retval);
 } /* __PHYSFS_platformWrite */
